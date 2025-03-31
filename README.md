@@ -7,9 +7,8 @@ BU-ISCIII provides a serie or services in its portfolio for supporting bioinform
 
 - [buisciii-tools](#buisciii-tools)
   - [Installation](#installation)
-    - [Bioconda](#bioconda)
-    - [Pip](#pip)
-    - [Development version](#development-version)
+    - [Micromamba and pip](#micromamba-and-pip)
+    - [Dev version](#dev-version)
   - [Usage](#usage)
     - [Command-line](#command-line)
       - [list](#list)
@@ -22,32 +21,45 @@ BU-ISCIII provides a serie or services in its portfolio for supporting bioinform
       - [bioinfo\_doc](#bioinfo_doc)
       - [archive](#archive)
       - [autoclean\_sftp](#autoclean_sftp)
+      - [fix-permissions](#fix-permissions)
   - [Acknowledgements](#acknowledgements)
 
 ## Installation
 
-### Bioconda
+### Micromamba and pip
 
 ```bash
-conda create -n buisciii-tools pip
-conda activate 
-conda env update --file environment.yml
+micromamba create -n buisciii -f environment.yml
+micromamba activate buisciii
+pip install buisciii-tools
 ```
 
-### Pip
+or
 
 ```bash
+git checkout main
+conda create -n buisciii -f environment.yml
 conda activate 
-pip install .
+pip install buisciii-tools
 ```
 
-### Development version
+### Dev version
 
 If you want to install the latest code in the repository:
 
 ```bash
-conda create -n buisciii_dev pip
+micromamba create -n buisciii_dev -f environment.yml
+micromamba activate buisciii_dev
 pip install --force-reinstall --upgrade git+https://github.com/bu-isciii/buisciii-tools.git@develop
+```
+
+or locally:
+
+```bash
+git checkout develop
+micromamba create -n buisciii_dev -f environment.yml
+micromamba activate buisciii_dev
+pip install .
 ```
 
 ## Usage
@@ -72,7 +84,7 @@ Options:
   -u, --api_user TEXT        User for the API logging
   -p, --api_password TEXT    Password for the API logging
   -c, --cred_file TEXT       Config file with API logging credentials
-  --help                     Show this message and exit.
+  --help                     Show this message and exit
 
 Commands:
   list         List available bu-isciii services.
@@ -83,6 +95,8 @@ Commands:
   finish       Service cleaning, remove big files, rename folders before...
   bioinfo-doc  Create the folder documentation structure in bioinfo_doc...
   archive      Archive services or retrieve services from archive
+  autoclean-sftp   Clean old sftp services
+  fix-permissions  Fix permissions
 ```
 
 #### list
@@ -110,7 +124,7 @@ Output:
 ┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃           Service name ┃ Description                               ┃ Github                                     ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│    assembly_annotation │ Nextflow assembly pipeline to assemble    │                                            │
+│    assembly_annotation │ Nextflow assembly pipeline to assemble    │ https://github.com/Daniel-VM/bacass/...    │
 │                        │ bacterial genomes                         │                                            │
 │        mtbseq_assembly │ Mycobacterium tuberculosis mapping,       │ https://github.com/ngs-fzb/MTBseq_source   │
 │                        │ variant calling and detection of          │                                            │
@@ -137,9 +151,10 @@ Output:
 │                        │ control, host removal and exploratory     │                                            │
 │                        │ analysis of samples.                      │                                            │
 │ ariba_characterization │                                           │                                            │
-│                mag_met │ Bioinformatics best-practise analysis     │ https://github.com/nf-core/mag             │
-│                        │ pipeline for assembly, binning and        │                                            │
-│                        │ annotation of metagenomes.                │                                            │
+│                mag_met │ 1- Bioinformatics best-practise analysis  │ https://github.com/nf-core/mag or          │
+│                        │ for taxonomic classification and          │ https://github.com/nf-core/taxprofiler     │
+│                        │ profiling; 2- Bioinformatics best-practise│                                            │
+│                        │ analysis pipeline for assembly, binning   │                                            │
 └────────────────────────┴───────────────────────────────────────────┴────────────────────────────────────────────┘
 ```
 
@@ -187,13 +202,13 @@ Options:
   -a, --ask_path                  Please ask for service path.
   -t, --tmp_dir PATH              Directory to which the files will be
                                   transfered for execution. Default:
-                                  /data/bi/scratch_tmp/bi/
+                                  /data/ucct/bi/scratch_tmp/bi/
   -d, --direction [service_to_scratch|scratch_to_service|remove_scratch]
                                   Direction of the rsync command.
-                                  service_to_scratch from /data/bi/service to
-                                  /data/bi/scratch_tmp/bi/.scratch_to_service:
-                                  From /data/bi/scratch_tmp/bi/ to
-                                  /data/bi/service
+                                  service_to_scratch from /data/ucct/bi/service to
+                                  /data/ucct/bi/scratch_tmp/bi/.scratch_to_service:
+                                  From /data/ucct/bi/scratch_tmp/bi/ to
+                                  /data/ucct/bi/service
   --help                          Show this message and exit.
 ```
 
@@ -374,6 +389,26 @@ Options:
   -s, --sftp_folder PATH  Absolute path to sftp folder
   -d, --days INTEGER      Integer, remove files older than a window of `-d
                           [int]` days. Default 14 days.
+  --help                  Show this message and exit.
+```
+
+#### fix-permissions
+
+Example of usage:
+
+```bash
+bu-isciii fix-permissions -d /data/bi
+```
+
+Help:
+
+```bash
+Usage: bu-isciii fix-permissions [OPTIONS]
+
+  Fix permissions
+
+Options:
+  -d, --input_directory PATH  Input directory to fix permissions (absolute path) [required]
   --help                  Show this message and exit.
 ```
 

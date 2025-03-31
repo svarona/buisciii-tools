@@ -1,0 +1,3 @@
+# module load singularity
+
+cp /data/ucct/bi/references/ariba/databases.txt .
