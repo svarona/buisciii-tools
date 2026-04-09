@@ -1,0 +1,36 @@
+# module load singularity
+# Activate the micromamba environment
+eval "$(micromamba shell hook --shell bash)"
+micromamba activate refgenie_v0.12.1
+
+# Create folders.
+mkdir -p fasta_inputs
+mkdir -p logs
+
+# Find all .gz files and write them to a file list.
+find ../../*ANALYSIS*ASSEMBLY/*-assembly/unicycler/*.fasta.gz > fasta_inputs/assembly_file_list.txt
+ASSEMBLY_LIST=fasta_inputs/assembly_file_list.txt
+
+scratch_dir=$(echo $PWD | sed "s/\/data\/ucct\/bi\/scratch_tmp/\/scratch/g")
+
+# STEP 1: Unzip fasta files after assembly.
+
+# Unzip the files.
+cat fasta_inputs/assembly_file_list.txt | while read file; do echo "srun --partition short_idx --cpus-per-task 2 --mem 8G --chdir ${scratch_dir} --time 2:00:00 --output logs/GZIP.%j.log gzip -dk $file &"; done >> _00_unzip.sh
+while read -r file; do echo "ln -sf "../${file%.gz}" "fasta_inputs/$(basename "${file%.gz}")""; done < fasta_inputs/assembly_file_list.txt >> _00_unzip.sh
+
+# STEP 2: Setup exe file to perform unzip and emmtyper.
+
+# Create results folder.
+mkdir -p typing
+blastdb_path=/data/ucct/bi/references/refgenie/data/$(refgenie alias get -a BLAST -c /data/ucct/bi/references/refgenie/genome_config.yaml)/cdc_emm/v20240509
+
+echo "srun --partition short_idx --cpus-per-task 4 --mem 24G --chdir ${scratch_dir} --time 4:00:00 --output logs/EMMTYPER.%j.log singularity exec -B ${scratch_dir}/../../ -B $blastdb_path /data/ucct/bi/pipelines/singularity-images/singularity-emmtyper.0.2.0--py_0 emmtyper -w blast --keep --blast_db "${blastdb_path}/cdc_emm_database" --percent-identity 100 --culling-limit 5 --output typing/results_emmtyper.out --output-format verbose ./fasta_inputs/*.fasta &" > _01_emmtyper.sh
+
+# Bash script that PERFORMS ALL STEPS ABOVE.
+echo "#!/bin/bash" > _ALLSTEPS_emmtyper.sh
+echo "bash _00_unzip.sh" >> _ALLSTEPS_emmtyper.sh
+echo "wait  # Wait for all unzip jobs to complete" >> _ALLSTEPS_emmtyper.sh
+echo "bash _01_emmtyper.sh" >> _ALLSTEPS_emmtyper.sh
+
+chmod +x _ALLSTEPS_emmtyper.sh

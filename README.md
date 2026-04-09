@@ -7,9 +7,8 @@ BU-ISCIII provides a serie or services in its portfolio for supporting bioinform
 
 - [buisciii-tools](#buisciii-tools)
   - [Installation](#installation)
-    - [Bioconda](#bioconda)
-    - [Pip](#pip)
-    - [Development version](#development-version)
+    - [Micromamba and pip](#micromamba-and-pip)
+    - [Dev version](#dev-version)
   - [Usage](#usage)
     - [Command-line](#command-line)
       - [list](#list)
@@ -22,32 +21,45 @@ BU-ISCIII provides a serie or services in its portfolio for supporting bioinform
       - [bioinfo\_doc](#bioinfo_doc)
       - [archive](#archive)
       - [autoclean\_sftp](#autoclean_sftp)
+      - [fix-permissions](#fix-permissions)
   - [Acknowledgements](#acknowledgements)
 
 ## Installation
 
-### Bioconda
+### Micromamba and pip
 
 ```bash
-conda create -n buisciii-tools pip
-conda activate 
-conda env update --file environment.yml
+micromamba create -n buisciii -f environment.yml
+micromamba activate buisciii
+pip install buisciii-tools
 ```
 
-### Pip
+or
 
 ```bash
+git checkout main
+conda create -n buisciii -f environment.yml
 conda activate 
-pip install .
+pip install buisciii-tools
 ```
 
-### Development version
+### Dev version
 
 If you want to install the latest code in the repository:
 
 ```bash
-conda create -n buisciii_dev pip
+micromamba create -n buisciii_dev -f environment.yml
+micromamba activate buisciii_dev
 pip install --force-reinstall --upgrade git+https://github.com/bu-isciii/buisciii-tools.git@develop
+```
+
+or locally:
+
+```bash
+git checkout develop
+micromamba create -n buisciii_dev -f environment.yml
+micromamba activate buisciii_dev
+pip install .
 ```
 
 ## Usage
@@ -57,13 +69,13 @@ pip install --force-reinstall --upgrade git+https://github.com/bu-isciii/buiscii
 Run bu-isciii tools:
 
 ```bash
-bu-isciii --help
+buisciii --help
 ```
 
 Outputs the following:
 
 ```bash
-Usage: bu-isciii [OPTIONS] COMMAND [ARGS]...
+Usage: buisciii [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --version                  Show the version and exit.
@@ -72,6 +84,8 @@ Options:
   -u, --api_user TEXT        User for the API logging
   -p, --api_password TEXT    Password for the API logging
   -c, --cred_file TEXT       Config file with API logging credentials
+  -D, --debug                Show the full traceback on error for debugging purposes.
+  -d, --dev                  Develop settings
   --help                     Show this message and exit.
 
 Commands:
@@ -83,6 +97,8 @@ Commands:
   finish       Service cleaning, remove big files, rename folders before...
   bioinfo-doc  Create the folder documentation structure in bioinfo_doc...
   archive      Archive services or retrieve services from archive
+  autoclean-sftp   Clean old sftp services
+  fix-permissions  Fix permissions
 ```
 
 #### list
@@ -96,7 +112,7 @@ bu-isciii list
 Help:
 
 ```bash
-Usage: bu-isciii list [OPTIONS] <service>
+Usage: buisciii list [OPTIONS] <service>
 
   List available bu-isciii services.
 
@@ -107,40 +123,29 @@ Options:
 Output:
 
 ```bash
-┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃           Service name ┃ Description                               ┃ Github                                     ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│    assembly_annotation │ Nextflow assembly pipeline to assemble    │                                            │
-│                        │ bacterial genomes                         │                                            │
-│        mtbseq_assembly │ Mycobacterium tuberculosis mapping,       │ https://github.com/ngs-fzb/MTBseq_source   │
-│                        │ variant calling and detection of          │                                            │
-│                        │ resistance using MTBseq                   │                                            │
-│                 mtbseq │ Mycobacterium tuberculosis mapping,       │ https://github.com/ngs-fzb/MTBseq_source   │
-│                        │ variant calling and detection of          │                                            │
-│                        │ resistance using MTBseq                   │                                            │
-│              pikavirus │ PikaVirus, a mapping-based tool for       │ https://github.com/BU-ISCIII/PikaVirus     │
-│                        │ metagenome analysis of virus.             │                                            │
-│     plasmidid_assembly │ Plasmid identification tool based on      │ https://github.com/BU-ISCIII/plasmidID     │
-│                        │ mapping and assisted by assembly          │                                            │
-│         wgmlst_taranis │ Multilocus sequence typing (MLST) using   │ https://github.com/BU-ISCIII/taranis       │
-│                        │ Taranis                                   │                                            │
-│       wgmlst_chewbbaca │ Multilocus sequence typing (MLST) using   │ https://github.com/B-UMMI/chewBBACA        │
-│                        │ chewBBACA                                 │                                            │
-│             viralrecon │ Viral genome reconstruction analysis for  │ https://github.com/BU-ISCIII/viralrecon    │
-│                        │ SARS-COV-2 data                           │                                            │
-│                 rnaseq │ RNA-seq analysis                          │ https://github.com/nf-core/rnaseq          │
-│          lowfreq_panel │ Low frequency variant calling from        │                                            │
-│                        │ enrichment panel.                         │                                            │
-│                 snippy │ Rapid haploid variant calling and core    │ https://github.com/tseemann/snippy         │
-│                        │ genome alignment                          │                                            │
-│       seek_and_destroy │ Simple pipeline for basic quality         │ https://github.com/GuilleGorines/Seek-Des… │
-│                        │ control, host removal and exploratory     │                                            │
-│                        │ analysis of samples.                      │                                            │
-│ ariba_characterization │                                           │                                            │
-│                mag_met │ Bioinformatics best-practise analysis     │ https://github.com/nf-core/mag             │
-│                        │ pipeline for assembly, binning and        │                                            │
-│                        │ annotation of metagenomes.                │                                            │
-└────────────────────────┴───────────────────────────────────────────┴────────────────────────────────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃        Service name ┃ Description                                                                                                              ┃ Github                                        ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│                IRMA │ Influenza fragment reconstruction and variant detection                                                                  │ https://github.com/CDCgov/irma                │
+│ assembly_annotation │ nf-core/bacass:  Simple bacterial assembly and annotation pipeline                                                       │ https://github.com/nf-core/bacass/tree/2.4.0  │
+│            blast_nt │ Alignment of de novo assembly contigs to database                                                                        │ -                                             │
+│    characterization │ Multi-Locus Sequence Typing (MLST), analysis of virulence factors, antimicrobial resistance and plasmid characterization │ -                                             │
+│             exomeeb │ Eukaria: Variant calling and annotation for a sequencing panel (e.g. epidermolysis gene panel, mouse or rat gene panel)  │ -                                             │
+│           exometrio │ Human: Exome sequencing for variant calling, annotation and inheritance filtering                                        │ -                                             │
+│  freebayes_outbreak │ Variant calling, annotation and SNP-based outbreak analysis (e.g. diploid fungal outbreak)                               │ -                                             │
+│       lowfreq_panel │ Low frequency variant calling from enrichment panel                                                                      │ -                                             │
+│           pikavirus │ PikaVirus, a mapping-based tool for metagenome analysis of virus                                                         │ https://github.com/BU-ISCIII/PikaVirus        │
+│  plasmidid_assembly │ Plasmid identification tool based on mapping and assisted by assembly                                                    │ https://github.com/BU-ISCIII/plasmidID        │
+│              rnaseq │ RNA-Seq analysis                                                                                                         │ https://github.com/nf-core/rnaseq             │
+│    seek_and_destroy │ Simple pipeline for basic quality control, host removal and exploratory analysis of samples                              │ https://github.com/GuilleGorines/Seek-Destroy │
+│              snippy │ Rapid haploid variant calling and core genome alignment                                                                  │ https://github.com/tseemann/snippy            │
+│         taxprofiler │ Highly parallelised multi-taxonomic profiling of shotgun short- and long-read metagenomic data                           │ https://github.com/nf-core/taxprofiler        │
+│          tbprofiler │ Mycobacterium tuberculosis variant calling and resistance prediction using TBProfiler                                    │ https://github.com/jodyphelan/TBProfiler      │
+│          viralrecon │ Viral genome reconstruction analysis for SARS-COV-2 data                                                                 │ https://github.com/BU-ISCIII/viralrecon       │
+│    wgmlst_chewbbaca │ Multilocus sequence typing (MLST) using chewBBACA                                                                        │ https://github.com/B-UMMI/chewBBACA           │
+│      wgmlst_taranis │ Multilocus sequence typing (MLST) using Taranis                                                                          │ https://github.com/BU-ISCIII/taranis          │
+│             wgstrio │ Human: Whole genome sequencing for SNPs variant calling, annotation and inheritance filtering                            │ -                                             │
+└─────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────┘
 ```
 
 #### new-service
@@ -148,13 +153,13 @@ Output:
 Example of usage:
 
 ```bash
-bu-isciii new-service <resolution_id>
+buisciii new-service <resolution_id>
 ```
 
 Help:
 
 ```bash
-Usage: bu-isciii new-service [OPTIONS] <resolution id>
+Usage: buisciii new-service [OPTIONS] <resolution id>
 
   Create new service, it will create folder and copy template depending on
   selected service.
@@ -171,13 +176,13 @@ Options:
 Example of usage:
 
 ```bash
-bu-isciii scratch --direction service_to_scratch <resolution_id>
+buisciii scratch --direction service_to_scratch <resolution_id>
 ```
 
 Help:
 
 ```bash
-Usage: bu-isciii scratch [OPTIONS] <resolution id>
+Usage: buisciii scratch [OPTIONS] <resolution id>
 
   Copy service folder to scratch directory for execution.
 
@@ -187,13 +192,13 @@ Options:
   -a, --ask_path                  Please ask for service path.
   -t, --tmp_dir PATH              Directory to which the files will be
                                   transfered for execution. Default:
-                                  /data/bi/scratch_tmp/bi/
+                                  /data/ucct/bi/scratch_tmp/bi/
   -d, --direction [service_to_scratch|scratch_to_service|remove_scratch]
                                   Direction of the rsync command.
-                                  service_to_scratch from /data/bi/service to
-                                  /data/bi/scratch_tmp/bi/.scratch_to_service:
-                                  From /data/bi/scratch_tmp/bi/ to
-                                  /data/bi/service
+                                  service_to_scratch from /data/ucct/bi/service to
+                                  /data/ucct/bi/scratch_tmp/bi/.scratch_to_service:
+                                  From /data/ucct/bi/scratch_tmp/bi/ to
+                                  /data/ucct/bi/service
   --help                          Show this message and exit.
 ```
 
@@ -202,13 +207,13 @@ Options:
 Example of usage:
 
 ```bash
-bu-isciii finish <resolution_id>
+buisciii finish <resolution_id>
 ```
 
 Help:
 
 ```bash
-Usage: bu-isciii finish [OPTIONS] <resolution id>
+Usage: buisciii finish [OPTIONS] <resolution id>
 
   Service cleaning, remove big files, rename folders before copy and copy
   resolution FOLDER to sftp.
@@ -231,13 +236,13 @@ Finish module performs de following modules at onin this order, at once:
 Example of usage:
 
 ```bash
-bu-isciii clean <resolution_id>
+buisciii clean <resolution_id>
 ```
 
 Help:
 
 ```bash
-Usage: bu-isciii clean [OPTIONS] <resolution id>
+Usage: buisciii clean [OPTIONS] <resolution id>
 
   Service cleaning. It will either remove big files, rename folders before
   copy, revert this renaming, show removable files or show folders for no
@@ -263,7 +268,7 @@ Options:
 ##### scratch back
 
 ```bash
-bu-isciii scratch --direction scratch_to_service <resolution_id>
+buisciii scratch --direction scratch_to_service <resolution_id>
 ```
 
 ##### copy_sftp
@@ -271,13 +276,13 @@ bu-isciii scratch --direction scratch_to_service <resolution_id>
 Example of usage:
 
 ```bash
-bu-isciii copy-sftp <resolution_id>
+buisciii copy-sftp <resolution_id>
 ```
 
 Help:
 
 ```bash
-Usage: bu-isciii copy-sftp [OPTIONS] <resolution id>
+Usage: buisciii copy-sftp [OPTIONS] <resolution id>
 
   Copy resolution FOLDER to sftp, change status of resolution in iskylims and
   generate md, pdf, html.
@@ -296,13 +301,13 @@ Options:
 Example of usage:
 
 ```bash
-bu-isciii bioinfo-doc <resolution_id>
+buisciii bioinfo-doc <resolution_id>
 ```
 
 Help:
 
 ```bash
-Usage: bu-isciii bioinfo-doc [OPTIONS] <resolution id>
+Usage: buisciii bioinfo-doc [OPTIONS] <resolution id>
 
   Create the folder documentation structure in bioinfo_doc server
 
@@ -327,13 +332,13 @@ Options:
 Example of usage:
 
 ```bash
-bu-isciii archive --date_from 2022-01-01 --date_until 2023-01-01
+buisciii archive --date_from 2022-01-01 --date_until 2023-01-01
 ```
 
 Help:
 
 ```bash
-Usage: bu-isciii archive [OPTIONS]
+Usage: buisciii archive [OPTIONS]
 
   Archive services or retrieve services from archive
 
@@ -360,13 +365,13 @@ Options:
 Example of usage:
 
 ```bash
-bu-isciii autoclean-sftp
+buisciii autoclean-sftp
 ```
 
 Help:
 
 ```bash
-Usage: bu-isciii autoclean-sftp [OPTIONS]
+Usage: buisciii autoclean-sftp [OPTIONS]
 
   Clean old sftp services
 
@@ -374,6 +379,26 @@ Options:
   -s, --sftp_folder PATH  Absolute path to sftp folder
   -d, --days INTEGER      Integer, remove files older than a window of `-d
                           [int]` days. Default 14 days.
+  --help                  Show this message and exit.
+```
+
+#### fix-permissions
+
+Example of usage:
+
+```bash
+buisciii fix-permissions -d /data/bi
+```
+
+Help:
+
+```bash
+Usage: buisciii fix-permissions [OPTIONS]
+
+  Fix permissions
+
+Options:
+  -d, --input_directory PATH  Input directory to fix permissions (absolute path) [required]
   --help                  Show this message and exit.
 ```
 
