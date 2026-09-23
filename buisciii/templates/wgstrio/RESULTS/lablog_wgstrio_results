@@ -1,0 +1,30 @@
+mkdir $(date '+%Y%m%d')_entrega01
+cd $(date '+%Y%m%d')_entrega01
+
+#Create symbolic links depending on the analysis
+#Individual files
+
+ln -s ../../ANALYSIS/*ANALYSIS01_GENOME/99-stats/hsMetrics_all.out mapping_metrics.csv
+ln -s ../../ANALYSIS/*ANALYSIS01_GENOME/01-sarek/multiqc/multiqc_report.html .
+ln -s ../../ANALYSIS/*ANALYSIS01_GENOME/03-annotation/variants_*filterAF*.tab .
+
+ln -s ../../ANALYSIS/*ANALYSIS01_GENOME/03-annotation/filter_inheritance annotation_tables
+
+# Prepare data for OmicsExplorer
+
+mkdir OmicsExplorer
+
+ln -s ../../ANALYSIS/*ANALYSIS01_GENOME/03-annotation/filter_inheritance/filter_inheritance/vep_annot_ALL_final.txt \
+./OmicsExplorer/vep_annot_ALL_genes_final_genome.txt
+
+ln -s ../../ANALYSIS/*ANALYSIS01_GENOME/03-annotation/filter_inheritance/filter_inheritance_exome/vep_annot_ALL_exome_final.txt \
+./OmicsExplorer/
+
+ln -s ../../ANALYSIS/*ANALYSIS01_GENOME/03-annotation/filter_inheritance/filter_inheritance_genes/vep_annot_ALL_genes_final.txt \
+./OmicsExplorer/
+
+ln -s ../../ANALYSIS/*ANALYSIS01_GENOME/99-stats/hsMetrics_all.out \
+./OmicsExplorer/mapping_metrics_genome.csv
+
+ln -s ../../ANALYSIS/*ANALYSIS01_GENOME/99-stats/bigwig \
+./OmicsExplorer/

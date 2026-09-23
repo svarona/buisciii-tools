@@ -1,0 +1,8 @@
+# module load singularity
+
+ln -s ../samples_id.txt .
+mkdir logs
+
+scratch_dir=$(echo $PWD | sed "s/\/data\/ucct\/bi\/scratch_tmp/\/scratch/g")
+
+cat samples_id.txt | while read in; do mkdir ${in}; echo "srun --partition short_idx --cpus-per-task 10 --mem 35000M --chdir ${scratch_dir} --time 10:00:00 --output logs/SAMTOOLS_MPILEUP.${in}.%j.log singularity exec -B ${scratch_dir}/../../../ -B /data/ucct/bi/references/ /data/ucct/bi/pipelines/singularity-images/samtools:1.22.1--h96c455f_0 samtools mpileup -A -d 20000 -Q 0 -f /data/ucct/bi/references/eukaria/homo_sapiens/hg19/1000genomes_b37/genome/human_g1k_v37.fasta ${scratch_dir}/../04-mapping/${in}/${in}_sorted.bam -o ${in}/${in}.pileup &"; done >> _01_samtools_mpileup.sh
